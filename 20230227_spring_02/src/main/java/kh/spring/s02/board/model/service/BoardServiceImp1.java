@@ -4,14 +4,16 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import kh.spring.s02.board.model.dao.BoardDao;
 import kh.spring.s02.board.model.vo.BoardVo;
+import lombok.AllArgsConstructor;
 
 @Service
+@AllArgsConstructor
 public class BoardServiceImp1 implements BoardService{
 
-	@Autowired
 	private BoardDao dao;
 	
 //	@Autowired
@@ -22,6 +24,7 @@ public class BoardServiceImp1 implements BoardService{
 	
 	
 	@Override
+	@Transactional
 	public int insert(BoardVo vo) {
 		if(vo.getBoardNum() != 0) {
 			// 답글   (원글은 0)
