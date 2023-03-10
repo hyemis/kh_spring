@@ -17,77 +17,78 @@ import org.springframework.util.StopWatch;
 @Aspect
 public class AdviceLog {
 	
-	private static final Logger logger = LoggerFactory.getLogger(AdviceLog.class); 
+	private static final Logger logger = LoggerFactory.getLogger(AdviceLog.class);
 	
 	
-	
-	// * 1개 이상이 존재함. 뭐든 상관없다.
-	// .. 0개 이상이 존재함. 
-	@Pointcut("execution(public * kh.spring.s02..*Controller.*(..) )")
+	// * 1개이상이 존재함. 
+	// .. 0개이상이 존재
+	@Pointcut("execution(public * kh.spring.s02..*Controller.*(..))")
 	public void controllerPointCut() {}
-	// 위 pointcut의 이름은 "controllerPointCut" 이름을 지정하기위해서 만들어진 메소드임으로 구현부는 딱히 없음 
-	// 어노테이션을 위해서 메소드가 쓰임
+	// 위 pointcut의 이름은  "controllerPointCut()"
 	
-	
-	
-	@Pointcut("execution(public * kh.spring.s02..*Dao.*(..) )")
+	@Pointcut("execution(public * kh.spring.s02..*Dao.*(..))")
 	public void daoPointCut() {}
 	
-	@Pointcut("execution(public * kh.spring.s02..*ServiceImp1.*(..) )")
-	public void ServicePointCut() {}
+	@Pointcut("execution(public * kh.spring.s02..*ServiceImpl.*(..))")
+	public void serviceImplPointCut() {}
 	
 	@Around("controllerPointCut()")
-	public Object aroundControlerPointCut(ProceedingJoinPoint pjp) throws Throwable{
-		
+	public Object aroundControllerPointCut(ProceedingJoinPoint pjp) throws Throwable{
 		Object returnObj = null;
+		
+		logger.info("▶Ctrl: " + pjp.getThis() + " " +pjp.getSignature().getName());
+		
 		
 		Object[] args = pjp.getArgs();
 		for(int i=0; i<args.length; i++) {
-			System.out.println("args[" + i + "]: " + args[i] );
+			logger.info("▶args["+i+"]: "+ args[i]);
+		}
+		
+		StopWatch stopwatch = new StopWatch();
+		stopwatch.start();
+		// 타겟메소드 실행
+		returnObj = pjp.proceed();
+		stopwatch.stop();
+		
+		logger.info("▶Ctrl Return["+stopwatch.getTotalTimeMillis()+"]: "+ returnObj);
+		return returnObj;
+//		System.out.println("컨트롤러 모든 메소드가 호출되면 해당메소드(타겟메소드)가 실행되기 "
+//				+ " 전 Before 바로 이 메소드(beforeControllerPointCut)를 실행하고  "
+//				+ " 컨트롤러의 해당메소드(타겟메소드)로 가서 실행됨.");
+	}
+	@Around("serviceImplPointCut()")
+	public Object aroundServiceImplPointCut(ProceedingJoinPoint pjp) throws Throwable {
+		Object returnObj = null;
+		
+		logger.info("▶Srvc: " + pjp.getThis() + " " +pjp.getSignature().getName());
+		Object[] args = pjp.getArgs();
+		for(int i=0; i<args.length; i++) {
+			logger.info("▶▶args["+i+"]: "+ args[i]);
 		}
 		StopWatch stopwatch = new StopWatch();
 		stopwatch.start();
-		
+		// 타겟메소드 실행
 		returnObj = pjp.proceed();
 		stopwatch.stop();
-		logger.info("Ctrl Return[" + stopwatch.getTotalTimeMillis() + "]: " + returnObj);
+		
+		logger.info("▶▶Srvc Return["+stopwatch.getTotalTimeMillis()+"]: "+ returnObj);
 		return returnObj;
 	}
-	
 	@Around("daoPointCut()")
 	public Object aroundDaoPointCut(ProceedingJoinPoint pjp) throws Throwable {
 		Object returnObj = null;
-		
+		logger.info("▶DAO: " + pjp.getThis() + " " + pjp.getSignature().getName());
 		Object[] args = pjp.getArgs();
 		for(int i=0; i<args.length; i++) {
-			logger.info("args[" + i + "]: " + args[i] );
-		} 
-		
-		StopWatch stopwatch = new StopWatch();
-		stopwatch.start();
-		// 타켓 메소드 실행 
-		returnObj = pjp.proceed();
-		stopwatch.stop();
-		
-		logger.info("DAO Return[" + stopwatch.getTotalTimeMillis() + "]: " + returnObj);
-		return returnObj;
-	}
-	
-	@Around("ServicePointCut()")
-	public Object aroundServicePointCut(ProceedingJoinPoint pjp) throws Throwable{
-		
-		Object returnObj = null;
-		
-		Object[] args = pjp.getArgs();
-		for(int i=0; i<args.length; i++) {
-			System.out.println("args[" + i + "]: " + args[i] );
+			logger.info("▶▶▶args["+i+"]: "+ args[i]);
 		}
 		StopWatch stopwatch = new StopWatch();
 		stopwatch.start();
-		
+		// 타겟메소드 실행
 		returnObj = pjp.proceed();
 		stopwatch.stop();
-		logger.info("Srv Return[" + stopwatch.getTotalTimeMillis() + "]: " + returnObj);
+		
+		logger.info("▶▶▶DAO Return["+stopwatch.getTotalTimeMillis()+"]: "+ returnObj);
 		return returnObj;
 	}
 	
