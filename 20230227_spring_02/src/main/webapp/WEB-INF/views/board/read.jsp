@@ -1,6 +1,8 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
  <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
+<c:set var="cpath" value="${pageContext.request.contextPath }"></c:set>
+<c:set var="uploadpath" value="/resources/uploadfiles"></c:set>
 <!DOCTYPE html>
 <html>
 <head>
@@ -15,6 +17,10 @@
 </div>	
 <div>
 	<p>${board.boardContent }</p>
+</div>	
+
+<div>
+	<img src="${cpath }${cpath }${board.boardRenameFilename }"/>
 </div>	
 
 <form id="frmReply">

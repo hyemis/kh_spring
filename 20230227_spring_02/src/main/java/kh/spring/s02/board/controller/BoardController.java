@@ -1,8 +1,11 @@
 package kh.spring.s02.board.controller;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
@@ -16,12 +19,15 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.springframework.web.servlet.ModelAndView;
 
 import com.google.gson.Gson;
 
 import kh.spring.s02.board.model.service.BoardService;
 import kh.spring.s02.board.model.vo.BoardVo;
+import kh.spring.s02.common.file.FileUtil;
 
 @Controller
 @RequestMapping("/board")
@@ -32,6 +38,7 @@ public class BoardController {
 	
 	private final static int BOARD_LIMIT = 5; 
 	private final static int PAGE_LIMIT = 3;
+	private final static String UPLOARD_FOLDER = "\\resources\\uploadfiles" ;
 	
 	@RequestMapping(value = "/list", method = RequestMethod.GET)
 	public ModelAndView viewListBoard( ModelAndView mv) {
@@ -45,7 +52,7 @@ public class BoardController {
 		String searchWord = "답";
 		
 		// TODO
-		int currentPage = 1;
+		int currentPage = 2;
 		int totalCnt = service.selectOneCount(searchWord);
 		int totalPage = (totalCnt%BOARD_LIMIT==0)?
 				(totalCnt/BOARD_LIMIT) : 
@@ -137,15 +144,25 @@ public class BoardController {
 	}
 	
 	// 원글 작성 
-//	@PostMapping("/insert")
-	// TODO
-	@GetMapping("/insertPostTest")
-	public ModelAndView doInsertBoard(ModelAndView mv
+	@PostMapping("/insert")
+	public ModelAndView doInsertBoard(
+			MultipartHttpServletRequest multiReq,
+			@RequestParam(name = "report", required = false) MultipartFile multi
+			, HttpServletRequest request
+			,ModelAndView mv
 			, BoardVo vo
 			) {
-		vo.setBoardContent("임시내용");
-		vo.setBoardTitle("임시제목");
-		vo.setBoardWriter("user22");
+		Map<String, String> filePath;
+		List<Map<String, String>> fileListPath;
+		try {
+			fileListPath = new FileUtil().saveFileList(multiReq, request, null);
+			filePath = new FileUtil().saveFile(multi, request, null);
+			vo.setBoardOriginalFilename(filePath.get("original"));
+			vo.setBoardRenameFilename(filePath.get("rename"));
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		vo.setBoardWriter("user22");  //TODO
 		int result = service.insert(vo);
 		return mv;
 	}
@@ -212,5 +229,8 @@ public class BoardController {
 		return mv;
 	}
 	
+	
+	
+	//@ExceptionHandler
 	
 }
